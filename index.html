@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no"
     />
-    <title>PlatisRoomはろこあ - ご予約</title>
+    <title>PilatesRoomはろこあ - ご予約</title>
     <style>
       :root {
         --green: #6b8f71;
@@ -180,8 +180,13 @@
         align-items: center;
         justify-content: center;
       }
-      .cal-btn:hover {
+      .cal-btn:hover:not(:disabled) {
         background: var(--green-light);
+      }
+      .cal-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        color: var(--muted);
       }
       .cal-month {
         font-size: 17px;
@@ -379,6 +384,36 @@
       }
       .slot-rem {
         font-size: 11px;
+        color: var(--muted);
+      }
+
+      /* ── 日付ナビゲーション ── */
+      .day-nav {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 14px;
+        gap: 10px;
+      }
+      .day-nav-btn {
+        flex: 1;
+        padding: 10px;
+        border: 1.5px solid var(--border);
+        background: var(--white);
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        color: var(--green);
+        transition: all 0.15s;
+      }
+      .day-nav-btn:hover:not(:disabled) {
+        border-color: var(--green);
+        background: var(--green-light);
+      }
+      .day-nav-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
         color: var(--muted);
       }
 
@@ -737,24 +772,38 @@
   <body>
     <!-- ローディング -->
     <div id="loading">
-      <div class="logo">PlatisRoomはろこあ</div>
+      <div class="logo">PilatesRoomはろこあ</div>
       <div class="spinner"></div>
     </div>
 
     <div id="app" style="display: none">
       <!-- ① カレンダー -->
       <div id="v-cal" class="view">
-        <div class="hdr"><span class="hdr-logo">🌿 PlatisRoom</span></div>
+        <div class="hdr">
+          <span class="hdr-logo">PilatesRoom はろこあ</span>
+        </div>
         <div class="hero">
-          <h1>ピラティス体験・ご予約</h1>
+          <h1>ご予約カレンダー</h1>
           <p>日付をタップして空き時間をご確認ください</p>
-          <div class="free-badge">✨ 初回無料体験 受付中</div>
+          <div class="free-badge">初回無料体験 受付中</div>
         </div>
         <div class="cal-wrap">
           <div class="cal-nav">
-            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+            <button
+              class="cal-btn"
+              id="btn-prev-month"
+              onclick="changeMonth(-1)"
+            >
+              ‹
+            </button>
             <span class="cal-month" id="cal-month"></span>
-            <button class="cal-btn" onclick="changeMonth(1)">›</button>
+            <button
+              class="cal-btn"
+              id="btn-next-month"
+              onclick="changeMonth(1)"
+            >
+              ›
+            </button>
           </div>
           <div class="cal-wdays">
             <span>日</span><span>月</span><span>火</span><span>水</span>
@@ -775,8 +824,8 @@
           </div>
         </div>
         <div class="notice">
-          💚 <strong>初回体験は完全無料！お友達も一緒にどうぞ</strong><br />
-          はじめての方はぜひお気軽にご予約ください。
+          <strong>初回体験は完全無料！お友達とご一緒でもOK！</strong><br />
+          はじめての方はぜひお気軽にご予約ください！
         </div>
         <div class="pad"></div>
       </div>
@@ -790,6 +839,22 @@
         <div class="day-hdr">
           <div class="day-hdr-date" id="slot-date"></div>
           <div class="day-hdr-sub">ご希望の時間をタップしてください</div>
+        </div>
+        <div class="day-nav">
+          <button
+            class="day-nav-btn"
+            id="btn-prev-day"
+            onclick="navigateDay(-1)"
+          >
+            ‹ 前日
+          </button>
+          <button
+            class="day-nav-btn"
+            id="btn-next-day"
+            onclick="navigateDay(1)"
+          >
+            翌日 ›
+          </button>
         </div>
         <div class="slots" id="slots-list"></div>
         <div class="pad"></div>
@@ -815,6 +880,11 @@
             <div style="font-size: 12px; color: var(--muted); margin-top: 8px">
               ※ お友達もどうぞ！上限4名まで
             </div>
+          </div>
+
+          <div class="notice" style="margin: 0 0 14px">
+            <strong>個人情報の取り扱いについて</strong><br />
+            ご入力いただいた個人情報（お名前・電話番号）は、予約の確認・変更・前日リマインドのご連絡のみに使用します。第三者への提供は一切行いません。
           </div>
 
           <div class="card">
@@ -844,17 +914,21 @@
               <div class="errmsg" id="err-furi"></div>
             </div>
             <div class="fg">
-              <label class="flabel"
-                >LINE ID または 電話番号<span class="req">*</span></label
-              >
+              <label class="flabel">電話番号<span class="req">*</span></label>
               <input
                 class="finput"
                 id="f-contact"
-                type="text"
-                placeholder="例：090-0000-0000"
+                type="tel"
+                inputmode="tel"
+                placeholder="例：09012345678"
                 oninput="clearE('f-contact', 'err-contact')"
               />
               <div class="errmsg" id="err-contact"></div>
+              <div
+                style="font-size: 11px; color: var(--muted); margin-top: 6px"
+              >
+                ※ 入力いただいた情報は予約管理・ご連絡目的のみに使用します
+              </div>
             </div>
           </div>
         </div>
@@ -877,6 +951,9 @@
           </div>
           <div class="notice" style="margin: 0 0 14px">
             ※ キャンセルはLINE公式アカウントへご連絡ください。
+          </div>
+          <div class="notice" style="margin: 0 0 14px">
+            「予約を確定する」ボタンを押すことで、個人情報の取り扱いに同意したものとみなします。
           </div>
         </div>
         <div class="btnw gap">
@@ -901,9 +978,16 @@
             <div class="num-val" id="cfm-num">----</div>
           </div>
           <div class="suc-detail" id="suc-detail"></div>
+          <div
+            class="notice"
+            style="text-align: left; margin: 0 0 14px; width: 100%"
+          >
+            <strong>LINE通知を受け取る方へ</strong><br />
+            予約完了通知・前日リマインドをLINEでお受け取りいただけます。ご希望の方は、公式LINEを友達追加後、ご自身の電話番号をLINEにメッセージでお送りください。友達追加なしでも予約は可能です。
+          </div>
           <div style="width: 100%; margin-bottom: 10px">
             <button class="btn-line" onclick="addFriend()">
-              💬 LINEでPlatisRoomを友達追加する
+              💬 LINEでPilatesroomはろこあを友達追加する
             </button>
           </div>
           <button class="btn-s" onclick="go('cal')" style="width: 100%">
@@ -991,7 +1075,8 @@
       function daySt(slots) {
         const vs = Object.values(slots);
         const total = vs.length;
-        let ngCount = 0, waCount = 0;
+        let ngCount = 0,
+          waCount = 0;
         vs.forEach((s) => {
           if (s.closed || s.hasT || s.hasP || s.n >= CFG.MAX) ngCount++;
           else if (s.n > 0) waCount++;
@@ -1125,18 +1210,54 @@
           h += `<div class="${cls}" ${fn}><span class="dn">${d}</span>${st}</div>`;
         }
         document.getElementById("cal-grid").innerHTML = h;
+
+        // 前月・次月ボタンの有効/無効を制御
+        const curYear = today.getFullYear();
+        const curMonth = today.getMonth();
+        document.getElementById("btn-prev-month").disabled =
+          S.year === curYear && S.month === curMonth;
+        let maxMonth = curMonth + 1;
+        let maxYear = curYear;
+        if (maxMonth > 11) {
+          maxMonth = 0;
+          maxYear++;
+        }
+        document.getElementById("btn-next-month").disabled =
+          S.year === maxYear && S.month === maxMonth;
       }
 
       function changeMonth(d) {
-        S.month += d;
-        if (S.month > 11) {
-          S.month = 0;
-          S.year++;
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth();
+
+        let newMonth = S.month + d;
+        let newYear = S.year;
+        if (newMonth > 11) {
+          newMonth = 0;
+          newYear++;
         }
-        if (S.month < 0) {
-          S.month = 11;
-          S.year--;
+        if (newMonth < 0) {
+          newMonth = 11;
+          newYear--;
         }
+
+        // 当月より前には戻れない
+        if (newYear < curYear || (newYear === curYear && newMonth < curMonth))
+          return;
+        // 翌月より先には進めない
+        let maxMonth = curMonth + 1;
+        let maxYear = curYear;
+        if (maxMonth > 11) {
+          maxMonth = 0;
+          maxYear++;
+        }
+        if (newYear > maxYear || (newYear === maxYear && newMonth > maxMonth))
+          return;
+
+        S.year = newYear;
+        S.month = newMonth;
+
         if (CFG.DEMO) {
           S.avail = mockMonth(S.year, S.month);
         } else {
@@ -1180,6 +1301,35 @@
     </div>`;
           });
         document.getElementById("slots-list").innerHTML = h;
+
+        // 前日・翌日ボタンの有効/無効を制御
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const currentDate = new Date(S.date + "T00:00:00");
+
+        const prevDate = new Date(currentDate);
+        prevDate.setDate(prevDate.getDate() - 1);
+        document.getElementById("btn-prev-day").disabled =
+          prevDate < today || !S.avail[fmtD(prevDate)];
+
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+        document.getElementById("btn-next-day").disabled =
+          !S.avail[fmtD(nextDate)];
+      }
+
+      function navigateDay(direction) {
+        const current = new Date(S.date + "T00:00:00");
+        const next = new Date(current);
+        next.setDate(next.getDate() + direction);
+        const nextDs = fmtD(next);
+        if (S.avail[nextDs]) {
+          S.date = nextDs;
+          S.slot = null;
+          S.type = null;
+          S.num = 1;
+          go("slots");
+        }
       }
 
       function pickSlot(slot) {
@@ -1207,7 +1357,7 @@
             tag: "無料",
             cls: "free",
             dis: !empty,
-            desc: "はじめての方向け・お友達も一緒に参加OK！（最大4名）",
+            desc: "はじめての方向け・お友達もご一緒に参加OK！（最大4名）",
           },
           {
             id: "group",
@@ -1257,7 +1407,9 @@
         const st = slotSt(a ? a.slots[S.slot] : null);
         // ④ trial・group は人数カードを表示
         const showNum = id === "group" || id === "trial";
-        document.getElementById("num-card").style.display = showNum ? "block" : "none";
+        document.getElementById("num-card").style.display = showNum
+          ? "block"
+          : "none";
         if (showNum) drawNumGrid(id === "group" ? st.rem : CFG.MAX);
       }
 
@@ -1292,7 +1444,10 @@
       function toConfirm() {
         S.form.name = document.getElementById("f-name").value.trim();
         S.form.furi = document.getElementById("f-furi").value.trim();
-        S.form.contact = document.getElementById("f-contact").value.trim();
+        S.form.contact = document
+          .getElementById("f-contact")
+          .value.trim()
+          .replace(/[-ー\s　]/g, "");
         let err = false;
         if (!S.type) {
           alert("レッスン種別をお選びください");
@@ -1310,7 +1465,14 @@
           err = true;
         }
         if (!S.form.contact) {
-          showE("f-contact", "err-contact", "連絡先を入力してください");
+          showE("f-contact", "err-contact", "電話番号を入力してください");
+          err = true;
+        } else if (!/^0\d{9,10}$/.test(S.form.contact)) {
+          showE(
+            "f-contact",
+            "err-contact",
+            "正しい電話番号を入力してください（例：09012345678）",
+          );
           err = true;
         }
         if (!err) go("confirm");
@@ -1330,7 +1492,7 @@
             v: S.type === "personal" ? "1名（マンツーマン）" : `${S.num}名`,
           },
           { l: "お名前", v: `${S.form.name}（${S.form.furi}）` },
-          { l: "連絡先", v: S.form.contact },
+          { l: "電話番号", v: S.form.contact },
         ];
         document.getElementById("cfm-rows").innerHTML = rows
           .map(
