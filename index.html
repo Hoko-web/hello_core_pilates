@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no"
     />
-    <title>PilatesRoomはろこあ - ご予約</title>
+    <title>Pilatesroomはろこあ - ご予約</title>
     <style>
       :root {
         --green: #6b8f71;
@@ -180,8 +180,10 @@
         align-items: center;
         justify-content: center;
       }
-      .cal-btn:hover:not(:disabled) {
-        background: var(--green-light);
+      @media (hover: hover) {
+        .cal-btn:hover:not(:disabled) {
+          background: var(--green-light);
+        }
       }
       .cal-btn:disabled {
         opacity: 0.35;
@@ -239,8 +241,10 @@
       .cell.closed {
         cursor: default;
       }
-      .cell:not(.empty):not(.past):not(.closed):hover {
-        background: var(--green-light);
+      @media (hover: hover) {
+        .cell:not(.empty):not(.past):not(.closed):hover {
+          background: var(--green-light);
+        }
       }
       .cell.today .dn {
         background: var(--green-dark);
@@ -310,17 +314,21 @@
       /* ── 時間帯一覧 ── */
       .day-hdr {
         background: var(--green-light);
-        padding: 14px 18px;
+        padding: 14px 14px;
         border-bottom: 1px solid var(--border);
       }
       .day-hdr-date {
-        font-size: 20px;
+        font-size: 17px;
         font-weight: 800;
         color: var(--green-dark);
+        text-align: center;
+        flex: 1;
+        min-width: 0;
       }
       .day-hdr-sub {
         font-size: 13px;
         color: var(--muted);
+        text-align: center;
         margin-top: 3px;
       }
       .slots {
@@ -341,9 +349,11 @@
         border: 2px solid transparent;
         transition: all 0.15s;
       }
-      .slot-card:hover:not(.disabled) {
-        border-color: var(--green);
-        background: var(--green-light);
+      @media (hover: hover) {
+        .slot-card:hover:not(.disabled) {
+          border-color: var(--green);
+          background: var(--green-light);
+        }
       }
       .slot-card.disabled {
         opacity: 0.45;
@@ -387,29 +397,32 @@
         color: var(--muted);
       }
 
-      /* ── 日付ナビゲーション ── */
-      .day-nav {
+      /* ── 日付ナビゲーション（day-hdr内に統合）── */
+      .day-hdr-nav {
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        padding: 8px 14px;
-        gap: 10px;
+        gap: 8px;
       }
       .day-nav-btn {
-        flex: 1;
-        padding: 10px;
+        padding: 6px 14px;
         border: 1.5px solid var(--border);
         background: var(--white);
-        border-radius: 10px;
-        font-size: 14px;
+        border-radius: 8px;
+        font-size: 13px;
         font-weight: 600;
         cursor: pointer;
         font-family: inherit;
-        color: var(--green);
+        color: var(--green-dark);
         transition: all 0.15s;
+        white-space: nowrap;
+        min-width: 64px;
       }
-      .day-nav-btn:hover:not(:disabled) {
-        border-color: var(--green);
-        background: var(--green-light);
+      @media (hover: hover) {
+        .day-nav-btn:hover:not(:disabled) {
+          border-color: var(--green);
+          background: var(--green-light);
+        }
       }
       .day-nav-btn:disabled {
         opacity: 0.35;
@@ -724,8 +737,10 @@
         transition: background 0.15s;
         letter-spacing: 0.5px;
       }
-      .btn-p:hover:not(:disabled) {
-        background: var(--green-dark);
+      @media (hover: hover) {
+        .btn-p:hover:not(:disabled) {
+          background: var(--green-dark);
+        }
       }
       .btn-p:disabled {
         background: #bdbdbd;
@@ -744,9 +759,11 @@
         font-family: inherit;
         transition: all 0.15s;
       }
-      .btn-s:hover {
-        border-color: var(--green);
-        color: var(--green);
+      @media (hover: hover) {
+        .btn-s:hover {
+          border-color: var(--green);
+          color: var(--green);
+        }
       }
       .btn-line {
         width: 100%;
@@ -772,7 +789,7 @@
   <body>
     <!-- ローディング -->
     <div id="loading">
-      <div class="logo">PilatesRoomはろこあ</div>
+      <div class="logo">Pilatesroomはろこあ</div>
       <div class="spinner"></div>
     </div>
 
@@ -780,7 +797,7 @@
       <!-- ① カレンダー -->
       <div id="v-cal" class="view">
         <div class="hdr">
-          <span class="hdr-logo">PilatesRoom はろこあ</span>
+          <span class="hdr-logo">Pilatesroom はろこあ</span>
         </div>
         <div class="hero">
           <h1>ご予約カレンダー</h1>
@@ -837,24 +854,12 @@
           <span class="hdr-title">時間帯を選ぶ</span>
         </div>
         <div class="day-hdr">
-          <div class="day-hdr-date" id="slot-date"></div>
+          <div class="day-hdr-nav">
+            <button class="day-nav-btn" id="btn-prev-day" onclick="navigateDay(-1)">‹ 前日</button>
+            <div class="day-hdr-date" id="slot-date"></div>
+            <button class="day-nav-btn" id="btn-next-day" onclick="navigateDay(1)">翌日 ›</button>
+          </div>
           <div class="day-hdr-sub">ご希望の時間をタップしてください</div>
-        </div>
-        <div class="day-nav">
-          <button
-            class="day-nav-btn"
-            id="btn-prev-day"
-            onclick="navigateDay(-1)"
-          >
-            ‹ 前日
-          </button>
-          <button
-            class="day-nav-btn"
-            id="btn-next-day"
-            onclick="navigateDay(1)"
-          >
-            翌日 ›
-          </button>
         </div>
         <div class="slots" id="slots-list"></div>
         <div class="pad"></div>
@@ -1003,7 +1008,7 @@
       // ════════════════════════════════
       const CFG = {
         DEMO: false, // 本番時は false に変更
-        GAS: "https://script.google.com/macros/s/AKfycbzNPtHPrIEoNp2uWFDh_YxX9Hc8L1onjVAGTn9vbWLyMVNxATqrQLLky4uGjfbBD_j3/exec", // GASのデプロイURL
+        GAS: "https://script.google.com/macros/s/AKfycby1M0VSXURs9Q1NRCaludSoGTD341AdThVHb_pdmOTzil9Z1X3LP8hBA-vRpuq9xgo/exec", // GASのデプロイURL
         LINE: "https://line.me/R/ti/p/@837sdgni", // LINE友達追加URL
         START: 8, // 営業開始（時）
         END: 20, // 営業終了（時）
@@ -1260,13 +1265,20 @@
 
         if (CFG.DEMO) {
           S.avail = mockMonth(S.year, S.month);
+          drawCal();
         } else {
+          S.avail = {};   // 旧月データをクリア
+          drawCal();      // マークなしのカレンダーを即表示
+          // ローディング表示
+          const grid = document.getElementById("cal-grid");
+          grid.insertAdjacentHTML("afterbegin",
+            '<div style="grid-column:1/-1;text-align:center;padding:18px;color:var(--muted);font-size:13px;">' +
+            '<div class="spinner" style="margin:0 auto 8px;width:24px;height:24px;"></div>読み込み中...</div>');
           apiAvail(S.year, S.month).then((r) => {
             S.avail = r;
             drawCal();
           });
         }
-        drawCal();
       }
 
       function pickDate(ds) {
