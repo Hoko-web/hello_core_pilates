@@ -1049,7 +1049,7 @@
       // ════════════════════════════════
       const CFG = {
         DEMO: false, // 本番時は false に変更
-        GAS: "https://script.google.com/macros/s/AKfycbzK1qtUaOR6HYWwqInXUT5lBcLw-Ks1rtJacKG8JeBlT4eGMeqXoKeTrF9NIH1kIr7Y/exec", // GASのデプロイURL
+        GAS: "https://script.google.com/macros/s/AKfycbzdodKdhTxv_PIjBgXnPBuuevEJ__rFXjA_PsupP-5XVwSTLZW_fScYU7cHhZ7KQOzA/exec", // GASのデプロイURL
         START: 8, // 営業開始（時）
         END: 20, // 営業終了（時）
         MAX: 4, // グループ上限
@@ -1087,6 +1087,17 @@
           group: "グループレッスン",
           personal: "パーソナルレッスン",
         })[t] || t;
+
+      function getMaxDate() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const max = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+        if (max.getDate() !== today.getDate()) {
+          max.setDate(0);
+        }
+        max.setHours(0, 0, 0, 0);
+        return max;
+      }
 
       function slotSt(s) {
         if (!s || s.closed || s.hasT || s.hasP || s.n >= CFG.MAX)
@@ -1232,6 +1243,7 @@
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const maxDate = getMaxDate();
         const first = new Date(S.year, S.month, 1).getDay();
         const dim = new Date(S.year, S.month + 1, 0).getDate();
         let h = "";
@@ -1239,22 +1251,24 @@
         for (let d = 1; d <= dim; d++) {
           const dt = new Date(S.year, S.month, d),
             ds = fmtD(dt);
-          const past = dt < today,
-            isToday = dt.getTime() === today.getTime();
+          const past = dt < today;
+          const beyond = dt > maxDate;
+          const disabled = past || beyond;
+          const isToday = dt.getTime() === today.getTime();
           const dow = dt.getDay();
           let cls = "cell";
           if (dow === 0) cls += " sun";
           if (dow === 6) cls += " sat";
           if (isToday) cls += " today";
-          if (past) cls += " past";
+          if (disabled) cls += " past";
           const a = S.avail[ds];
           let st = "";
-          if (!past && a) {
+          if (!disabled && a) {
             if (a.code === "ng") cls += " closed";
             st = `<span class="ds ${a.code}">${a.mark}</span>`;
           }
           const fn =
-            !past && a && a.code !== "ng" ? `onclick="pickDate('${ds}')"` : "";
+            !disabled && a && a.code !== "ng" ? `onclick="pickDate('${ds}')"` : "";
           h += `<div class="${cls}" ${fn}><span class="dn">${d}</span>${st}</div>`;
         }
         document.getElementById("cal-grid").innerHTML = h;
@@ -1264,20 +1278,16 @@
         const curMonth = today.getMonth();
         document.getElementById("btn-prev-month").disabled =
           S.year === curYear && S.month === curMonth;
-        let maxMonth = curMonth + 1;
-        let maxYear = curYear;
-        if (maxMonth > 11) {
-          maxMonth = 0;
-          maxYear++;
-        }
         document.getElementById("btn-next-month").disabled =
-          S.year === maxYear && S.month === maxMonth;
+          S.year > maxDate.getFullYear() ||
+          (S.year === maxDate.getFullYear() && S.month >= maxDate.getMonth());
       }
 
       function changeMonth(d) {
         const now = new Date();
         const curYear = now.getFullYear();
         const curMonth = now.getMonth();
+        const maxDate = getMaxDate();
 
         let newMonth = S.month + d;
         let newYear = S.year;
@@ -1293,28 +1303,26 @@
         // 当月より前には戻れない
         if (newYear < curYear || (newYear === curYear && newMonth < curMonth))
           return;
-        // 翌月より先には進めない
-        let maxMonth = curMonth + 1;
-        let maxYear = curYear;
-        if (maxMonth > 11) {
-          maxMonth = 0;
-          maxYear++;
-        }
-        if (newYear > maxYear || (newYear === maxYear && newMonth > maxMonth))
+        // maxDateの月より先には進めない
+        if (newYear > maxDate.getFullYear() ||
+            (newYear === maxDate.getFullYear() && newMonth > maxDate.getMonth()))
           return;
 
         S.year = newYear;
         S.month = newMonth;
 
+        // 既にデータがあればそのまま描画
+        const firstDay = `${S.year}-${p2(S.month + 1)}-01`;
         if (CFG.DEMO) {
-          S.avail = mockMonth(S.year, S.month);
+          Object.assign(S.avail, mockMonth(S.year, S.month));
+          drawCal();
+        } else if (S.avail[firstDay] !== undefined) {
           drawCal();
         } else {
-          S.avail = {};
           drawCal();
           document.getElementById("overlay").classList.add("on");
           apiAvail(S.year, S.month).then((r) => {
-            S.avail = r;
+            Object.assign(S.avail, r);
             drawCal();
             document.getElementById("overlay").classList.remove("on");
           }).catch(() => {
@@ -1359,30 +1367,59 @@
         // 前日・翌日ボタンの有効/無効を制御
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const maxDate = getMaxDate();
         const currentDate = new Date(S.date + "T00:00:00");
 
         const prevDate = new Date(currentDate);
         prevDate.setDate(prevDate.getDate() - 1);
-        document.getElementById("btn-prev-day").disabled =
-          prevDate < today || !S.avail[fmtD(prevDate)];
+        document.getElementById("btn-prev-day").disabled = prevDate < today;
 
         const nextDate = new Date(currentDate);
         nextDate.setDate(nextDate.getDate() + 1);
-        document.getElementById("btn-next-day").disabled =
-          !S.avail[fmtD(nextDate)];
+        document.getElementById("btn-next-day").disabled = nextDate > maxDate;
       }
 
       function navigateDay(direction) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const maxDate = getMaxDate();
+
         const current = new Date(S.date + "T00:00:00");
         const next = new Date(current);
         next.setDate(next.getDate() + direction);
+        if (next < today || next > maxDate) return;
         const nextDs = fmtD(next);
-        if (S.avail[nextDs]) {
+
+        function goToDay() {
           S.date = nextDs;
           S.slot = null;
           S.type = null;
           S.num = 1;
+          S.year = next.getFullYear();
+          S.month = next.getMonth();
           go("slots");
+        }
+
+        // データが既にあればそのまま遷移
+        if (S.avail[nextDs]) {
+          goToDay();
+          return;
+        }
+
+        // 別の月のデータを取得してから遷移
+        document.getElementById("overlay").classList.add("on");
+        if (CFG.DEMO) {
+          Object.assign(S.avail, mockMonth(next.getFullYear(), next.getMonth()));
+          document.getElementById("overlay").classList.remove("on");
+          goToDay();
+        } else {
+          apiAvail(next.getFullYear(), next.getMonth()).then((r) => {
+            Object.assign(S.avail, r);
+            document.getElementById("overlay").classList.remove("on");
+            goToDay();
+          }).catch(() => {
+            document.getElementById("overlay").classList.remove("on");
+          });
         }
       }
 
