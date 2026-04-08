@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>Pilatesroomはろこあ - ご予約</title>
     <style>
@@ -37,6 +37,7 @@
         max-width: 480px;
         margin: 0 auto;
         min-height: 100vh;
+        touch-action: manipulation;
       }
 
       /* ── ローディング ── */
@@ -412,18 +413,18 @@
         gap: 8px;
       }
       .day-nav-btn {
-        padding: 6px 14px;
+        padding: 10px 20px;
         border: 1.5px solid var(--border);
         background: var(--white);
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
         cursor: pointer;
         font-family: inherit;
         color: var(--green-dark);
         transition: all 0.15s;
         white-space: nowrap;
-        min-width: 64px;
+        min-width: 80px;
       }
       @media (hover: hover) {
         .day-nav-btn:hover:not(:disabled) {
@@ -775,6 +776,40 @@
       .pad {
         height: 36px;
       }
+
+      /* ── ローディングオーバーレイ ── */
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .overlay.on {
+        display: flex;
+      }
+      .overlay-box {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 28px 36px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      }
+      .overlay-box .spinner {
+        margin: 0 auto 10px;
+      }
+      .overlay-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
     </style>
   </head>
   <body>
@@ -782,6 +817,13 @@
     <div id="loading">
       <div class="logo">Pilatesroomはろこあ</div>
       <div class="spinner"></div>
+    </div>
+
+    <div id="overlay" class="overlay">
+      <div class="overlay-box">
+        <div class="spinner"></div>
+        <div class="overlay-text">読み込み中...</div>
+      </div>
     </div>
 
     <div id="app" style="display: none">
@@ -847,9 +889,21 @@
         </div>
         <div class="day-hdr">
           <div class="day-hdr-nav">
-            <button class="day-nav-btn" id="btn-prev-day" onclick="navigateDay(-1)">‹ 前日</button>
+            <button
+              class="day-nav-btn"
+              id="btn-prev-day"
+              onclick="navigateDay(-1)"
+            >
+              ‹ 前日
+            </button>
             <div class="day-hdr-date" id="slot-date"></div>
-            <button class="day-nav-btn" id="btn-next-day" onclick="navigateDay(1)">翌日 ›</button>
+            <button
+              class="day-nav-btn"
+              id="btn-next-day"
+              onclick="navigateDay(1)"
+            >
+              翌日 ›
+            </button>
           </div>
           <div class="day-hdr-sub">ご希望の時間をタップしてください</div>
         </div>
@@ -946,7 +1000,6 @@
           <div class="notice" style="margin: 0 0 14px">
             ※ キャンセルはLINEメッセージにてご連絡ください。
           </div>
-         
         </div>
         <div class="btnw gap">
           <button class="btn-p" id="btn-cfm" onclick="submit()">
@@ -1132,7 +1185,13 @@
           method: "POST",
           body: JSON.stringify({ action: "createBooking", ...payload }),
         });
-        return r.json();
+        const text = await r.text();
+        console.log("apiBook raw response:", text);
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          return { error: "サーバーからの応答を処理できませんでした" };
+        }
       }
 
       // ════════════════════════════════
@@ -1253,13 +1312,13 @@
         } else {
           S.avail = {};
           drawCal();
-          const grid = document.getElementById("cal-grid");
-          grid.insertAdjacentHTML("afterbegin",
-            '<div style="grid-column:1/-1;text-align:center;padding:18px;color:var(--muted);font-size:13px;">' +
-            '<div class="spinner" style="margin:0 auto 8px;width:24px;height:24px;"></div>読み込み中...</div>');
+          document.getElementById("overlay").classList.add("on");
           apiAvail(S.year, S.month).then((r) => {
             S.avail = r;
             drawCal();
+            document.getElementById("overlay").classList.remove("on");
+          }).catch(() => {
+            document.getElementById("overlay").classList.remove("on");
           });
         }
       }
@@ -1524,9 +1583,24 @@
               furigana: S.form.furi,
               contact: S.form.contact,
             });
-            cid = res.confirmId;
+            console.log("apiBook parsed response:", res);
+            if (!res || res.error) {
+              alert(res?.error || "予約処理中にエラーが発生しました");
+              btn.disabled = false;
+              btn.textContent = "この内容で予約を確定する";
+              return;
+            }
+            cid = res.confirmId || res.confirmid || res.id;
+            if (!cid) {
+              console.log("confirmId not found in response keys:", Object.keys(res));
+              alert("予約は受け付けましたが、予約番号の取得に失敗しました。スプレッドシートをご確認ください。");
+              btn.disabled = false;
+              btn.textContent = "この内容で予約を確定する";
+              return;
+            }
           } catch (e) {
-            alert("エラーが発生しました。もう一度お試しください。");
+            console.log("apiBook error:", e);
+            alert("通信エラーが発生しました。もう一度お試しください。");
             btn.disabled = false;
             btn.textContent = "この内容で予約を確定する";
             return;
