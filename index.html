@@ -112,17 +112,24 @@
         color: var(--green);
         font-size: 22px;
         border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .hdr-spacer {
+        width: 34px;
+        flex-shrink: 0;
       }
       .hdr-title {
         font-size: 16px;
         font-weight: 700;
         flex: 1;
+        text-align: center;
       }
       .hdr-logo {
         font-size: 19px;
         font-weight: 800;
         color: var(--green-dark);
         flex: 1;
+        text-align: center;
       }
 
       /* ── ヒーロー ── */
@@ -765,22 +772,6 @@
           color: var(--green);
         }
       }
-      .btn-line {
-        width: 100%;
-        padding: 15px;
-        background: #06c755;
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        font-family: inherit;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
       .pad {
         height: 36px;
       }
@@ -802,7 +793,7 @@
         <div class="hero">
           <h1>ご予約カレンダー</h1>
           <p>日付をタップして空き時間をご確認ください</p>
-          <div class="free-badge">初回無料体験 受付中</div>
+          <div class="free-badge">🎁 初回無料体験 受付中</div>
         </div>
         <div class="cal-wrap">
           <div class="cal-nav">
@@ -841,8 +832,8 @@
           </div>
         </div>
         <div class="notice">
-          <strong>初回体験は完全無料！お友達とご一緒でもOK！</strong><br />
-          はじめての方はぜひお気軽にご予約ください！
+          🎁 <strong>初回体験は完全無料 — お友達とご一緒にどうぞ</strong><br />
+          はじめての方もお気軽にご予約ください。
         </div>
         <div class="pad"></div>
       </div>
@@ -852,6 +843,7 @@
         <div class="hdr">
           <button class="hdr-back" onclick="go('cal')">‹</button>
           <span class="hdr-title">時間帯を選ぶ</span>
+          <div class="hdr-spacer"></div>
         </div>
         <div class="day-hdr">
           <div class="day-hdr-nav">
@@ -870,6 +862,7 @@
         <div class="hdr">
           <button class="hdr-back" onclick="go('slots')">‹</button>
           <span class="hdr-title">予約情報を入力</span>
+          <div class="hdr-spacer"></div>
         </div>
         <div class="fw">
           <div class="banner" id="form-banner"></div>
@@ -883,13 +876,8 @@
             <div class="card-ttl">👥 来店人数（ご自身を含む）</div>
             <div class="num-grid" id="num-grid"></div>
             <div style="font-size: 12px; color: var(--muted); margin-top: 8px">
-              ※ お友達もどうぞ！上限4名まで
+              ※ お友達もどうぞ（上限4名まで）
             </div>
-          </div>
-
-          <div class="notice" style="margin: 0 0 14px">
-            <strong>個人情報の取り扱いについて</strong><br />
-            ご入力いただいた個人情報（お名前・電話番号）は、予約の確認・変更・前日リマインドのご連絡のみに使用します。第三者への提供は一切行いません。
           </div>
 
           <div class="card">
@@ -929,12 +917,12 @@
                 oninput="clearE('f-contact', 'err-contact')"
               />
               <div class="errmsg" id="err-contact"></div>
-              <div
-                style="font-size: 11px; color: var(--muted); margin-top: 6px"
-              >
-                ※ 入力いただいた情報は予約管理・ご連絡目的のみに使用します
-              </div>
             </div>
+          </div>
+
+          <div class="notice" style="margin: 0 0 14px">
+            <strong>個人情報の取り扱いについて</strong><br />
+            ご入力いただいた個人情報（お名前・電話番号）は、予約の確認・変更・前日リマインドのご連絡のみに使用します。第三者への提供は一切行いません。
           </div>
         </div>
         <div class="btnw">
@@ -948,6 +936,7 @@
         <div class="hdr">
           <button class="hdr-back" onclick="go('form')">‹</button>
           <span class="hdr-title">予約内容の確認</span>
+          <div class="hdr-spacer"></div>
         </div>
         <div class="cfm-wrap">
           <div class="cfm-card">
@@ -955,7 +944,7 @@
             <div id="cfm-rows"></div>
           </div>
           <div class="notice" style="margin: 0 0 14px">
-            ※ キャンセルはLINE公式アカウントへご連絡ください。
+            ※ キャンセルはお電話にてご連絡ください。
           </div>
           <div class="notice" style="margin: 0 0 14px">
             「予約を確定する」ボタンを押すことで、個人情報の取り扱いに同意したものとみなします。
@@ -974,7 +963,7 @@
       <div id="v-success" class="view">
         <div class="suc-wrap">
           <div class="suc-icon">✅</div>
-          <div class="suc-ttl">予約が完了しました！</div>
+          <div class="suc-ttl">予約が完了しました</div>
           <div class="suc-sub">
             ご予約ありがとうございます。<br />画面をスクリーンショットして保存してください。
           </div>
@@ -987,13 +976,14 @@
             class="notice"
             style="text-align: left; margin: 0 0 14px; width: 100%"
           >
-            <strong>LINE通知を受け取る方へ</strong><br />
-            予約完了通知・前日リマインドをLINEでお受け取りいただけます。ご希望の方は、公式LINEを友達追加後、ご自身の電話番号をLINEにメッセージでお送りください。友達追加なしでも予約は可能です。
+            <strong>📩 ご予約後のご連絡について</strong><br />
+            ご予約内容を確認のうえ、個別にメッセージをお送りいたします。手動でのご連絡となるため、お時間をいただく場合がございます。あらかじめご了承ください。
           </div>
-          <div style="width: 100%; margin-bottom: 10px">
-            <button class="btn-line" onclick="addFriend()">
-              💬 LINEでPilatesroomはろこあを友達追加する
-            </button>
+          <div
+            class="notice"
+            style="text-align: left; margin: 0 0 20px; width: 100%"
+          >
+            ご登録の情報は予約管理のみに使用し、適切に管理いたします。
           </div>
           <button class="btn-s" onclick="go('cal')" style="width: 100%">
             トップに戻る
@@ -1008,8 +998,7 @@
       // ════════════════════════════════
       const CFG = {
         DEMO: false, // 本番時は false に変更
-        GAS: "https://script.google.com/macros/s/AKfycbwdoBeeLXMMiUwaqu21PgPewvAJAqZZr6P9lxHA0mhBQNfz6Uym5sXc6HCvjDLl1pK1/exec", // GASのデプロイURL
-        LINE: "https://line.me/R/ti/p/@837sdgni", // LINE友達追加URL
+        GAS: "https://script.google.com/macros/s/AKfycby1M0VSXURs9Q1NRCaludSoGTD341AdThVHb_pdmOTzil9Z1X3LP8hBA-vRpuq9xgo/exec", // GASのデプロイURL
         START: 8, // 営業開始（時）
         END: 20, // 営業終了（時）
         MAX: 4, // グループ上限
@@ -1076,7 +1065,6 @@
         });
       }
 
-      // ② 新しいdaySt: 6スロット以上が×/△なら△、全て×なら×
       function daySt(slots) {
         const vs = Object.values(slots);
         const total = vs.length;
@@ -1104,7 +1092,6 @@
           const slots = {};
           for (let h = CFG.START; h < CFG.END; h++) {
             const k = `${p2(h)}:00`;
-            // ① 日曜デフォルト休業を削除 — 全日オープン
             const r = Math.random();
             if (r < 0.08)
               slots[k] = { closed: false, n: 0, hasT: true, hasP: false };
@@ -1126,7 +1113,6 @@
               };
             else slots[k] = { closed: false, n: 0, hasT: false, hasP: false };
           }
-          // ③ バッファー適用（予約済み前後1時間を×）
           applyBuffer(slots);
           const st = daySt(slots);
           data[ds] = { slots, mark: st.mark, code: st.c };
@@ -1267,9 +1253,8 @@
           S.avail = mockMonth(S.year, S.month);
           drawCal();
         } else {
-          S.avail = {};   // 旧月データをクリア
-          drawCal();      // マークなしのカレンダーを即表示
-          // ローディング表示
+          S.avail = {};
+          drawCal();
           const grid = document.getElementById("cal-grid");
           grid.insertAdjacentHTML("afterbegin",
             '<div style="grid-column:1/-1;text-align:center;padding:18px;color:var(--muted);font-size:13px;">' +
@@ -1369,7 +1354,7 @@
             tag: "無料",
             cls: "free",
             dis: !empty,
-            desc: "はじめての方向け・お友達もご一緒に参加OK！（最大4名）",
+            desc: "はじめての方向け・お友達もご一緒に参加OK（最大4名）",
           },
           {
             id: "group",
@@ -1409,7 +1394,6 @@
 
       function pickType(id) {
         S.type = id;
-        // ④ personal のみマンツーマン固定。trial・group は人数選択可
         if (id === "personal") S.num = 1;
         document.querySelectorAll(".lopt").forEach((el) => {
           const fn = el.getAttribute("onclick");
@@ -1417,7 +1401,6 @@
         });
         const a = S.avail[S.date];
         const st = slotSt(a ? a.slots[S.slot] : null);
-        // ④ trial・group は人数カードを表示
         const showNum = id === "group" || id === "trial";
         document.getElementById("num-card").style.display = showNum
           ? "block"
@@ -1573,14 +1556,6 @@
               `<div class="srow"><span class="slabel">${r.l}</span><span class="sval">${r.v}</span></div>`,
           )
           .join("");
-      }
-
-      function addFriend() {
-        if (CFG.DEMO) {
-          alert("本番では LINE 友達追加ページが開きます");
-          return;
-        }
-        window.open(CFG.LINE, "_blank");
       }
 
       // ════════════════════════════════
