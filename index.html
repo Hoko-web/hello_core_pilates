@@ -6,7 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Pilatesroomはろこあ - ご予約</title>
+    <title>pilatesroomはろこあ - ご予約</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
     <style>
       :root {
         --green: #6b8f71;
@@ -63,10 +66,18 @@
         }
       }
       .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'M PLUS Rounded 1c', sans-serif;
         font-size: 22px;
-        font-weight: 800;
+        font-weight: 700;
         color: var(--green-dark);
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+      }
+      .logo-img {
+        height: 56px;
+        width: auto;
       }
 
       /* ── 画面切り替え ── */
@@ -126,8 +137,12 @@
         text-align: center;
       }
       .hdr-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'M PLUS Rounded 1c', sans-serif;
         font-size: 19px;
-        font-weight: 800;
+        font-weight: 700;
         color: var(--green-dark);
         flex: 1;
         text-align: center;
@@ -815,7 +830,7 @@
   <body>
     <!-- ローディング -->
     <div id="loading">
-      <div class="logo">Pilatesroomはろこあ</div>
+      <div class="logo"><img src="logo.png" alt="ロゴ" class="logo-img">pilatesroomはろこあ</div>
       <div class="spinner"></div>
     </div>
 
@@ -830,7 +845,7 @@
       <!-- ① カレンダー -->
       <div id="v-cal" class="view">
         <div class="hdr">
-          <span class="hdr-logo">Pilatesroom はろこあ</span>
+          <span class="hdr-logo"><img src="logo.png" alt="ロゴ" style="height:36px;width:auto;">pilatesroom はろこあ</span>
         </div>
         <div class="hero">
           <h1>ご予約カレンダー</h1>
@@ -945,6 +960,7 @@
                 id="f-name"
                 type="text"
                 placeholder="例：山田 花子"
+                maxlength="10"
                 oninput="clearE('f-name', 'err-name')"
               />
               <div class="errmsg" id="err-name"></div>
@@ -966,9 +982,10 @@
                 class="finput"
                 id="f-contact"
                 type="tel"
-                inputmode="tel"
+                inputmode="numeric"
                 placeholder="例：09012345678"
-                oninput="clearE('f-contact', 'err-contact')"
+                maxlength="15"
+                oninput="sanitizePhone(this); clearE('f-contact', 'err-contact')"
               />
               <div class="errmsg" id="err-contact"></div>
             </div>
@@ -1251,7 +1268,7 @@
         for (let d = 1; d <= dim; d++) {
           const dt = new Date(S.year, S.month, d),
             ds = fmtD(dt);
-          const past = dt < today;
+          const past = dt <= today;
           const beyond = dt > maxDate;
           const disabled = past || beyond;
           const isToday = dt.getTime() === today.getTime();
@@ -1372,7 +1389,7 @@
 
         const prevDate = new Date(currentDate);
         prevDate.setDate(prevDate.getDate() - 1);
-        document.getElementById("btn-prev-day").disabled = prevDate < today;
+        document.getElementById("btn-prev-day").disabled = prevDate <= today;
 
         const nextDate = new Date(currentDate);
         nextDate.setDate(nextDate.getDate() + 1);
@@ -1387,7 +1404,7 @@
         const current = new Date(S.date + "T00:00:00");
         const next = new Date(current);
         next.setDate(next.getDate() + direction);
-        if (next < today || next > maxDate) return;
+        if (next <= today || next > maxDate) return;
         const nextDs = fmtD(next);
 
         function goToDay() {
@@ -1519,6 +1536,14 @@
           .forEach((b, i) => b.classList.toggle("sel", i + 1 === n));
       }
 
+      function sanitizePhone(el) {
+        const pos = el.selectionStart;
+        const prev = el.value;
+        el.value = prev.replace(/\D/g, "").slice(0, 15);
+        const diff = prev.length - el.value.length;
+        el.setSelectionRange(pos - diff, pos - diff);
+      }
+
       function clearE(fid, eid) {
         document.getElementById(fid).classList.remove("err");
         document.getElementById(eid).style.display = "none";
@@ -1533,10 +1558,7 @@
       function toConfirm() {
         S.form.name = document.getElementById("f-name").value.trim();
         S.form.furi = document.getElementById("f-furi").value.trim();
-        S.form.contact = document
-          .getElementById("f-contact")
-          .value.trim()
-          .replace(/[-ー\s　]/g, "");
+        S.form.contact = document.getElementById("f-contact").value.trim();
         let err = false;
         if (!S.type) {
           alert("レッスン種別をお選びください");
@@ -1555,13 +1577,6 @@
         }
         if (!S.form.contact) {
           showE("f-contact", "err-contact", "電話番号を入力してください");
-          err = true;
-        } else if (!/^0\d{9,10}$/.test(S.form.contact)) {
-          showE(
-            "f-contact",
-            "err-contact",
-            "正しい電話番号を入力してください（例：09012345678）",
-          );
           err = true;
         }
         if (!err) go("confirm");
