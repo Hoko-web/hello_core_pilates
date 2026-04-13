@@ -113,8 +113,8 @@
         gap: 10px;
       }
       .hdr-back {
-        width: 34px;
-        height: 34px;
+        width: 48px;
+        height: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -122,12 +122,12 @@
         border: none;
         cursor: pointer;
         color: var(--green);
-        font-size: 22px;
+        font-size: 30px;
         border-radius: 50%;
         flex-shrink: 0;
       }
       .hdr-spacer {
-        width: 34px;
+        width: 48px; /* hdr-back と同幅にしてタイトルを中央に保つ */
         flex-shrink: 0;
       }
       .hdr-title {
@@ -972,6 +972,7 @@
                 id="f-furi"
                 type="text"
                 placeholder="例：ヤマダ ハナコ"
+                maxlength="20"
                 oninput="clearE('f-furi', 'err-furi')"
               />
               <div class="errmsg" id="err-furi"></div>
@@ -1065,11 +1066,11 @@
       //  ★ ここだけ書き換えてください ★
       // ════════════════════════════════
       const CFG = {
-        DEMO: false, // 本番時は false に変更
+        DEMO: false,  // デモ表示: true=モックデータ / false=本番GAS
         GAS: "https://script.google.com/macros/s/AKfycbyAPgvg82xKTTzUryHesSPS5fLQ2taDy_h_9B9T2LO64T35SC_qJUjIY3SRZE7DcKNR/exec", // GASのデプロイURL
-        START: 8, // 営業開始（時）
-        END: 20, // 営業終了（時）
-        MAX: 4, // グループ上限
+        START: 8,     // 営業開始（時）
+        END: 20,      // 営業終了（時）
+        MAX: 4,       // グループレッスン上限人数
       };
 
       // ════════════════════════════════
@@ -1090,6 +1091,11 @@
       // ════════════════════════════════
       //  ユーティリティ
       // ════════════════════════════════
+
+      // XSS対策: innerHTML に埋め込む前にユーザー入力をエスケープする
+      const esc = (s) =>
+        String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
       const p2 = (n) => String(n).padStart(2, "0");
       const fmtD = (d) =>
         `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
@@ -1154,6 +1160,7 @@
           else if (s.n > 0) waCount++;
         });
         if (ngCount === total) return { c: "ng", mark: "×" };
+        // 該当日のスロットのうち6つ以上が満席/残りわずかなら△（混雑気味）
         if (ngCount + waCount >= 6) return { c: "wa", mark: "△" };
         return { c: "ok", mark: "○" };
       }
@@ -1214,7 +1221,7 @@
           body: JSON.stringify({ action: "createBooking", ...payload }),
         });
         const text = await r.text();
-        console.log("apiBook raw response:", text);
+        if (CFG.DEMO) console.log("apiBook raw response:", text);
         try {
           return JSON.parse(text);
         } catch (e) {
@@ -1344,6 +1351,7 @@
             document.getElementById("overlay").classList.remove("on");
           }).catch(() => {
             document.getElementById("overlay").classList.remove("on");
+            alert("空き状況の取得に失敗しました。通信環境をご確認のうえ、再度お試しください。");
           });
         }
       }
@@ -1595,8 +1603,8 @@
             l: "来店人数",
             v: S.type === "personal" ? "1名（マンツーマン）" : `${S.num}名`,
           },
-          { l: "お名前", v: `${S.form.name}（${S.form.furi}）` },
-          { l: "電話番号", v: S.form.contact },
+          { l: "お名前", v: `${esc(S.form.name)}（${esc(S.form.furi)}）` },
+          { l: "電話番号", v: esc(S.form.contact) },
         ];
         document.getElementById("cfm-rows").innerHTML = rows
           .map(
@@ -1635,7 +1643,7 @@
               furigana: S.form.furi,
               contact: S.form.contact,
             });
-            console.log("apiBook parsed response:", res);
+            if (CFG.DEMO) console.log("apiBook parsed response:", res);
             if (!res || res.error) {
               alert(res?.error || "予約処理中にエラーが発生しました");
               btn.disabled = false;
@@ -1644,14 +1652,14 @@
             }
             cid = res.confirmId || res.confirmid || res.id;
             if (!cid) {
-              console.log("confirmId not found in response keys:", Object.keys(res));
+              if (CFG.DEMO) console.log("confirmId not found in response keys:", Object.keys(res));
               alert("予約は受け付けましたが、予約番号の取得に失敗しました。スプレッドシートをご確認ください。");
               btn.disabled = false;
               btn.textContent = "この内容で予約を確定する";
               return;
             }
           } catch (e) {
-            console.log("apiBook error:", e);
+            if (CFG.DEMO) console.log("apiBook error:", e);
             alert("通信エラーが発生しました。もう一度お試しください。");
             btn.disabled = false;
             btn.textContent = "この内容で予約を確定する";
@@ -1673,7 +1681,7 @@
           { l: "日付", v: dateLabel(S.date) },
           { l: "時間", v: `${S.slot} 〜 ${end}` },
           { l: "レッスン", v: typeLabel(S.type) },
-          { l: "お名前", v: S.form.name },
+          { l: "お名前", v: esc(S.form.name) },
         ]
           .map(
             (r) =>
