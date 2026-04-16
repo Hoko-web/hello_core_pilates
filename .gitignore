@@ -1,0 +1,12 @@
+# GASコード（GASエディタで管理、GitHub Pagesには含めない）
+gas.js
+
+# ドキュメント（要件定義書など、ローカルのみ保管）
+docs/
+
+# 修正点一覧（過去の変更ログ）
+*.md
+!README.md
+
+# OS生成ファイル
+.DS_Store
