@@ -218,7 +218,7 @@ function drawCal() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const maxDate = getMaxDate();
-  const first = new Date(S.year, S.month, 1).getDay();
+  const first = (new Date(S.year, S.month, 1).getDay() + 6) % 7;
   const dim = new Date(S.year, S.month + 1, 0).getDate();
   let h = "";
   for (let i = 0; i < first; i++) h += `<div class="cell empty"></div>`;
