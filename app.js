@@ -13,7 +13,7 @@ const CFG = {
 
   // ── 予約ルール ──
   MAX: 4,             // グループレッスン上限人数
-  BOOK_MONTHS: 1,     // 何ヶ月先まで予約可能か
+  BOOK_MONTHS: 1,     // (未使用) 予約上限は翌月末固定
   WARN_THRESHOLD: 6,  // △（混雑気味）と判定するスロット数
 };
 
@@ -64,11 +64,8 @@ const slotLabel = () => `${CFG.SLOT_MIN}分`;
 
 function getMaxDate() {
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const max = new Date(today.getFullYear(), today.getMonth() + CFG.BOOK_MONTHS, today.getDate());
-  if (max.getDate() !== today.getDate()) {
-    max.setDate(0);
-  }
+  // 翌月末（day=0 で当月末→+2 で翌月末）
+  const max = new Date(today.getFullYear(), today.getMonth() + 2, 0);
   max.setHours(0, 0, 0, 0);
   return max;
 }

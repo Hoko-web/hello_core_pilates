@@ -226,11 +226,11 @@ body {
   font-weight: 700;
   color: var(--muted);
 }
-.cal-wdays span:first-child {
-  color: #d94040;
+.cal-wdays span:nth-child(6) {
+  color: #1e7dd4;
 }
 .cal-wdays span:last-child {
-  color: #1e7dd4;
+  color: #d94040;
 }
 .cal-grid {
   display: grid;
