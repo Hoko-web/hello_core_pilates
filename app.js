@@ -4,7 +4,7 @@
 const CFG = {
   // ── 基本設定 ──
   DEMO: false, // デモ表示: true=モックデータ / false=本番GAS
-  GAS: "https://script.google.com/macros/s/AKfycbwUomeMAHOn7cbo84gwmcc0CGskh2vcNENaQaXu9RS0SaIRTEvLU-v0FoDHJshh2OVO/exec",
+  GAS: "https://script.google.com/macros/s/AKfycbySNc5YTnr4sy0FJVhKoBObU49wI5QQDSPKUPijoIvjyJau8Hc-8ZbP4vX4C2ULEUzP/exec",
 
   // ── 営業時間 ──
   START: 8, // 営業開始（時）
