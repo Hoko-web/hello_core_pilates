@@ -4,7 +4,7 @@
 const CFG = {
   // ── 基本設定 ──
   DEMO: false, // デモ表示: true=モックデータ / false=本番GAS
-  GAS: "https://script.google.com/macros/s/AKfycbySNc5YTnr4sy0FJVhKoBObU49wI5QQDSPKUPijoIvjyJau8Hc-8ZbP4vX4C2ULEUzP/exec",
+  GAS: "https://script.google.com/macros/s/AKfycbz5u5FUt1krEdKLgN222pTqQGIo3Wb8wYb-fBe3x1Kk7KvAv-z-XlkLrl1Kv_AuJbcN/exec",
 
   // ── 営業時間 ──
   START: 8, // 営業開始（時）
@@ -70,7 +70,11 @@ function getMaxDate() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   // 今日から1ヶ月後
-  const max = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+  const max = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    today.getDate(),
+  );
   max.setHours(0, 0, 0, 0);
   return max;
 }
