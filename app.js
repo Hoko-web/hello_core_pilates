@@ -3,18 +3,18 @@
 // ════════════════════════════════
 const CFG = {
   // ── 基本設定 ──
-  DEMO: false,  // デモ表示: true=モックデータ / false=本番GAS
-  GAS: "https://script.google.com/macros/s/AKfycbwbN6AAxK5T9MKoCQzhcrr2rMRy_chdhhludtwsBWaauKjG1cNmQYn6oroXFJiXjZfJ/exec",
+  DEMO: false, // デモ表示: true=モックデータ / false=本番GAS
+  GAS: "https://script.google.com/macros/s/AKfycbwUomeMAHOn7cbo84gwmcc0CGskh2vcNENaQaXu9RS0SaIRTEvLU-v0FoDHJshh2OVO/exec",
 
   // ── 営業時間 ──
-  START: 8,           // 営業開始（時）
-  END: 20,            // 営業終了（時）
-  SLOT_MIN: 60,       // 1スロットの長さ（分）
+  START: 8, // 営業開始（時）
+  END: 20, // 営業終了（時）
+  SLOT_MIN: 60, // 1スロットの長さ（分）
 
   // ── 予約ルール ──
-  MAX: 4,             // グループレッスン上限人数
-  BOOK_MONTHS: 1,     // (未使用) 予約上限は翌月末固定
-  WARN_THRESHOLD: 6,  // △（混雑気味）と判定するスロット数
+  MAX: 4, // グループレッスン上限人数
+  BOOK_MONTHS: 1, // (未使用) 予約上限は翌月末固定
+  WARN_THRESHOLD: 6, // △（混雑気味）と判定するスロット数
 };
 
 // ════════════════════════════════
@@ -38,7 +38,11 @@ const S = {
 
 // XSS対策: innerHTML に埋め込む前にユーザー入力をエスケープする
 const esc = (s) =>
-  String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 
 const p2 = (n) => String(n).padStart(2, "0");
 const fmtD = (d) =>
@@ -126,8 +130,7 @@ function mockMonth(y, m) {
     for (let h = CFG.START; h < CFG.END; h++) {
       const k = `${p2(h)}:00`;
       const r = Math.random();
-      if (r < 0.08)
-        slots[k] = { closed: false, n: 0, hasT: true, hasP: false };
+      if (r < 0.08) slots[k] = { closed: false, n: 0, hasT: true, hasP: false };
       else if (r < 0.14)
         slots[k] = { closed: false, n: 0, hasT: false, hasP: true };
       else if (r < 0.25)
@@ -180,9 +183,7 @@ async function apiBook(payload) {
 //  画面遷移
 // ════════════════════════════════
 function go(name) {
-  document
-    .querySelectorAll(".view")
-    .forEach((v) => v.classList.remove("on"));
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("on"));
   document.getElementById("v-" + name).classList.add("on");
   window.scrollTo(0, 0);
   if (name === "cal") drawCal();
@@ -272,11 +273,12 @@ function changeMonth(d) {
   }
 
   // 当月より前には戻れない
-  if (newYear < curYear || (newYear === curYear && newMonth < curMonth))
-    return;
+  if (newYear < curYear || (newYear === curYear && newMonth < curMonth)) return;
   // maxDateの月より先には進めない
-  if (newYear > maxDate.getFullYear() ||
-      (newYear === maxDate.getFullYear() && newMonth > maxDate.getMonth()))
+  if (
+    newYear > maxDate.getFullYear() ||
+    (newYear === maxDate.getFullYear() && newMonth > maxDate.getMonth())
+  )
     return;
 
   S.year = newYear;
@@ -292,14 +294,18 @@ function changeMonth(d) {
   } else {
     drawCal();
     document.getElementById("overlay").classList.add("on");
-    apiAvail(S.year, S.month).then((r) => {
-      Object.assign(S.avail, r);
-      drawCal();
-      document.getElementById("overlay").classList.remove("on");
-    }).catch(() => {
-      document.getElementById("overlay").classList.remove("on");
-      alert("空き状況の取得に失敗しました。通信環境をご確認のうえ、再度お試しください。");
-    });
+    apiAvail(S.year, S.month)
+      .then((r) => {
+        Object.assign(S.avail, r);
+        drawCal();
+        document.getElementById("overlay").classList.remove("on");
+      })
+      .catch(() => {
+        document.getElementById("overlay").classList.remove("on");
+        alert(
+          "空き状況の取得に失敗しました。通信環境をご確認のうえ、再度お試しください。",
+        );
+      });
   }
 }
 
@@ -385,13 +391,15 @@ function navigateDay(direction) {
     document.getElementById("overlay").classList.remove("on");
     goToDay();
   } else {
-    apiAvail(next.getFullYear(), next.getMonth()).then((r) => {
-      Object.assign(S.avail, r);
-      document.getElementById("overlay").classList.remove("on");
-      goToDay();
-    }).catch(() => {
-      document.getElementById("overlay").classList.remove("on");
-    });
+    apiAvail(next.getFullYear(), next.getMonth())
+      .then((r) => {
+        Object.assign(S.avail, r);
+        document.getElementById("overlay").classList.remove("on");
+        goToDay();
+      })
+      .catch(() => {
+        document.getElementById("overlay").classList.remove("on");
+      });
   }
 }
 
@@ -538,7 +546,11 @@ function toConfirm() {
     showE("f-contact", "err-contact", "電話番号を入力してください");
     err = true;
   } else if (!/^0\d{9,10}$/.test(S.form.contact)) {
-    showE("f-contact", "err-contact", "電話番号の形式が正しくありません（0から始まる10〜11桁）");
+    showE(
+      "f-contact",
+      "err-contact",
+      "電話番号の形式が正しくありません（0から始まる10〜11桁）",
+    );
     err = true;
   }
   if (!err) go("confirm");
@@ -606,8 +618,14 @@ async function submit() {
       }
       cid = res.confirmId || res.confirmid || res.id;
       if (!cid) {
-        if (CFG.DEMO) console.log("confirmId not found in response keys:", Object.keys(res));
-        alert("予約は受け付けましたが、予約番号の取得に失敗しました。スプレッドシートをご確認ください。");
+        if (CFG.DEMO)
+          console.log(
+            "confirmId not found in response keys:",
+            Object.keys(res),
+          );
+        alert(
+          "予約は受け付けましたが、予約番号の取得に失敗しました。スプレッドシートをご確認ください。",
+        );
         btn.disabled = false;
         btn.textContent = "この内容で予約を確定する";
         return;
@@ -655,11 +673,11 @@ async function init() {
       S.avail = await apiAvail(S.year, S.month);
     } catch (e) {
       document.getElementById("loading").innerHTML =
-        '<div style="text-align:center;padding:20px;color:var(--text);font-size:14px;line-height:1.8;">'
-        + '<div style="font-size:40px;margin-bottom:12px;">⚠️</div>'
-        + '<strong>データの取得に失敗しました</strong><br>'
-        + '通信環境をご確認のうえ<br>ページを再読み込みしてください。'
-        + '</div>';
+        '<div style="text-align:center;padding:20px;color:var(--text);font-size:14px;line-height:1.8;">' +
+        '<div style="font-size:40px;margin-bottom:12px;">⚠️</div>' +
+        "<strong>データの取得に失敗しました</strong><br>" +
+        "通信環境をご確認のうえ<br>ページを再読み込みしてください。" +
+        "</div>";
       return;
     }
   }
