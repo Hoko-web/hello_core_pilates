@@ -68,8 +68,9 @@ const slotLabel = () => `${CFG.SLOT_MIN}分`;
 
 function getMaxDate() {
   const today = new Date();
-  // 翌月末（day=0 で当月末→+2 で翌月末）
-  const max = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+  today.setHours(0, 0, 0, 0);
+  // 今日から1ヶ月後
+  const max = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
   max.setHours(0, 0, 0, 0);
   return max;
 }
